@@ -18,6 +18,9 @@ piece_setup = ["apawn", "bpawn", "cpawn", "dpawn", "epawn", "fpawn", "gpawn", "h
 white_pieces = []
 black_pieces = []
 
+
+font_setup = ("Comic Sans MS", 25, "normal")
+
 wn = t.Screen()
 wn.bgcolor("black")
 for piece in chess_pieces:
@@ -31,42 +34,103 @@ class Piece:
         self.team = team
         self.posX = posX
         self.posY = posY
-        turtle = t.Turtle()
-        turtle.shape(team + "_" + piece + ".gif")
-        turtle.penup()
-        turtle.speed(0)
-        turtle.goto(posX, posY)
+    def start(self):
+        self.name = self.turtle
+        self.turtle = t.Turtle()
+        self.turtle.shape(self.team + "_" + self.piece + ".gif")
+        self.turtle.penup()
+        self.turtle.speed(0)
+        self.turtle.goto(self.posX, self.posY)
+    def getPos(self):
+        return self.turtle.xcor(), self.turtle.ycor()
+    def getX(self):
+        return self.turtle.xcor()
+    def getY(self):
+        return self.turtle.ycor()
+    def showMoves(self):
+  
+        self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+100)
+        pos = self.turtle.xcor(), self.turtle.ycor()
+        print("check pos", pos) 
+        for piece in white_pieces:
+            if pos == piece.getPos() and self.name != piece.name:
+                print("bad move")
+        self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-100)
 
 
-'''class Pawn(Piece):
+def move(turtle):
+    turtle.goto(turtle.xcor(), turtle.ycor()+100)
+
+class Pawn(Piece):
     def __init__(self, turtle, shape, team, posX, posY):
         super().__init__(turtle, shape, team, posX, posY)
-'''
+
+    def possibleMoves(self):
+        self.xcor
+
 
 xcor = -350
-ycor = -350
+ycor = 350
 row = 0
 col = 0
+var = 0
 for r in board:
     for c in r:
         c = t.Turtle()
+        c.speed(0)
+        c.penup()
+        c.goto(xcor, ycor)
         c.shape("square")
         c.turtlesize(5)
-        c.penup()
-        c.speed(0)
-        c.goto(xcor, ycor)
+
         xcor += 100
-        
         if col % 2 == 0:
             c.color("burlywood")
         else:
             c.color("brown")
        
         col += 1
-    ycor += 100
+    ycor -= 100
     xcor = -350
     col += 1
     row += 1
+
+x = -390
+y = 360
+num = 8
+for i in range(8):
+    if i % 2 == 0:
+        color = "brown"
+    else:
+        color = "burlywood"
+    i = t.Turtle()
+    i.speed(0)
+    i.penup()
+    i.color(color)
+    i.hideturtle()
+    i.goto(x, y)
+    i.write(str(num), font=font_setup)
+    y -= 100
+    num -= 1
+
+x = -325
+y = -400
+num = 0
+letters = ["a", "b", "c", "d", "e", "f", "g", "h"]
+for i in range(8):
+    if i % 2 == 0:
+        color = "burlywood"
+    else:
+        color = "brown"
+    i = t.Turtle()
+    i.speed(0)
+    i.penup()
+    i.color(color)
+    i.hideturtle()
+    i.goto(x, y)
+    i.write(letters[num], font=font_setup)
+    x += 100
+    num += 1
 
 
 x = -350
@@ -76,6 +140,8 @@ for piece in piece_setup:
         y -= 100
         x = -350
     piece = Piece(piece, piece[1:], "white", x, y)
+    piece.start()
+    
     white_pieces.append(piece)
     x += 100
 
@@ -86,19 +152,24 @@ for piece in piece_setup:
         y += 100
         x = -350
     piece = Piece(piece, piece[1:], "black", x, y)
+    piece.start()
     black_pieces.append(piece)
     x += 100
 
-gameActive = True
-while gameActive:
-    turn = 0
-    if turn % 2 == 0:
-        for piece in white_pieces:
-            piece.turtle.ondrag(piece.turtle.goto)
-    else:
-        for piece in black_pieces:
-            piece.turtle.ondrag(piece.turtle.goto)
+white_pieces[10].showMoves()
 
-    turn += 1
 
+def click_check(x, y):
+    print(x, y)
+    for piece in white_pieces:
+        if x in range(piece.getX()-50, piece.getX()+50) and y in range(piece.getY()-50, piece.getY()+50):
+            print("white peice clicked")
+            piece.showMoves()
+    
+    for piece in black_pieces:
+        if x in range(piece.getX()-50, piece.getX()+50) and y in range(piece.getY()-50, piece.getY()+50):
+            print("black peice clicked")
+            piece.showMoves()
+ 
+wn.onclick(click_check)
 wn.mainloop()
