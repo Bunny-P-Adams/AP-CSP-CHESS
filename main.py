@@ -21,6 +21,7 @@ black_pieces = []
 
 font_setup = ("Comic Sans MS", 25, "normal")
 
+
 wn = t.Screen()
 wn.bgcolor("black")
 for piece in chess_pieces:
@@ -34,13 +35,19 @@ class Piece:
         self.team = team
         self.posX = posX
         self.posY = posY
-    def start(self):
-        self.name = self.turtle
+        self.name = self.turtle + self.team
         self.turtle = t.Turtle()
         self.turtle.shape(self.team + "_" + self.piece + ".gif")
         self.turtle.penup()
         self.turtle.speed(0)
         self.turtle.goto(self.posX, self.posY)
+
+        self.firstmove = True
+        self.showingMoves = False
+        self.possibleMoves = []
+        self.possibleMovesX = 0
+        self.possibleMovesY = 0
+
     def getPos(self):
         return self.turtle.xcor(), self.turtle.ycor()
     def getX(self):
@@ -48,14 +55,55 @@ class Piece:
     def getY(self):
         return self.turtle.ycor()
     def showMoves(self):
-  
         self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+100)
         pos = self.turtle.xcor(), self.turtle.ycor()
-        print("check pos", pos) 
+        badMove = False
+        print("check pos", pos)
         for piece in white_pieces:
             if pos == piece.getPos() and self.name != piece.name:
                 print("bad move")
+                badMove = True
+        for piece in black_pieces:
+            if pos == piece.getPos() and self.name != piece.name:
+                print("bad move")
+                badMove = True
+        if not badMove:
+            self.showingMoves = True
+            if pos not in (self.possibleMovesX, self.possibleMovesY):
+                self.possibleMoves.append(pos)
+                self.possibleMovesX = self.turtle.xcor()
+                self.possibleMovesY = self.turtle.ycor()
+            self.turtle.shape("circle")
+            self.turtle.color("grey") 
+            self.stamp = self.turtle.stamp()        
+            self.turtle.shape(self.team + "_" + self.piece + ".gif")
         self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-100)
+        
+        if self.firstmove:
+            self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+200)
+            pos = self.turtle.xcor(), self.turtle.ycor()
+            badMove = False
+            print("check pos", pos)
+            for piece in white_pieces:
+                if pos == piece.getPos() and self.name != piece.name:
+                    print("bad move")
+                    badMove = True
+            for piece in black_pieces:
+                if pos == piece.getPos() and self.name != piece.name:
+                    print("bad move")
+                    badMove = True
+            if not badMove:
+                self.showingMoves = True
+                if pos not in (self.possibleMovesX, self.possibleMovesY):
+                    self.possibleMoves.append(pos)
+                    self.possibleMovesX = self.turtle.xcor()
+                    self.possibleMovesY = self.turtle.ycor()
+                self.turtle.shape("circle")
+                self.turtle.color("grey") 
+                self.stamp2 = self.turtle.stamp()        
+                self.turtle.shape(self.team + "_" + self.piece + ".gif")
+            self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-200)
+            self.firstmove = False
 
 
 def move(turtle):
@@ -67,7 +115,6 @@ class Pawn(Piece):
 
     def possibleMoves(self):
         self.xcor
-
 
 xcor = -350
 ycor = 350
@@ -140,7 +187,6 @@ for piece in piece_setup:
         y -= 100
         x = -350
     piece = Piece(piece, piece[1:], "white", x, y)
-    piece.start()
     
     white_pieces.append(piece)
     x += 100
@@ -152,24 +198,44 @@ for piece in piece_setup:
         y += 100
         x = -350
     piece = Piece(piece, piece[1:], "black", x, y)
-    piece.start()
     black_pieces.append(piece)
     x += 100
 
-white_pieces[10].showMoves()
+
 
 
 def click_check(x, y):
+    a = False
     print(x, y)
-    for piece in white_pieces:
-        if x in range(piece.getX()-50, piece.getX()+50) and y in range(piece.getY()-50, piece.getY()+50):
-            print("white peice clicked")
-            piece.showMoves()
-    
-    for piece in black_pieces:
-        if x in range(piece.getX()-50, piece.getX()+50) and y in range(piece.getY()-50, piece.getY()+50):
-            print("black peice clicked")
-            piece.showMoves()
- 
+    for piece in white_pieces or black_pieces:
+        a = True
+        if piece.showingMoves:
+            print(piece.possibleMovesX, piece.possibleMovesY)
+            
+            if x in range(piece.possibleMovesX - 50, piece.possibleMovesX + 50) and y in range(piece.possibleMovesY - 50, piece.possibleMovesY + 50):
+                piece.turtle.goto(piece.possibleMovesX, piece.possibleMovesY)
+                piece.showingMoves = False
+                piece.turtle.clearstamp(piece.stamp)
+                if piece.firstmove:
+                    piece.turtle.clearstamp(piece.stamp2)
+            else:
+                piece.possibleMovesX = 0
+                piece.possibleMovesY = 0
+                piece.showingMoves = False
+                piece.turtle.clearstamp(piece.stamp)
+                if piece.firstmove:
+                    piece.turtle.clearstamp(piece.stamp2)
+            a = False
+
+    if not piece.showingMoves and a:        
+        for piece in white_pieces:
+           if x in range(piece.getX()-50, piece.getX()+50) and y in range(piece.getY()-50, piece.getY()+50):
+               print("white peice clicked")
+               piece.showMoves()
+        for piece in black_pieces:
+           if x in range(piece.getX()-50, piece.getX()+50) and y in range(piece.getY()-50, piece.getY()+50):
+               print("black peice clicked")
+               piece.showMoves()
+
 wn.onclick(click_check)
 wn.mainloop()
