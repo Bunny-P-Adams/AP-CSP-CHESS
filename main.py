@@ -72,12 +72,17 @@ class Piece:
 
     def isMoveLegal(self):
         #pass
-        print("checking,.")
+        print("checking...")
         for piece in white_pieces:
-            
             if self.getPos() == piece.getPos() and self.name != piece.name:
                 print("ILLEGAL")
                 return False
+        
+        for piece in black_pieces:
+            if self.getPos() == piece.getPos() and self.name != piece.name:
+                print("ILLEGAL")
+                return False
+        
 
         if self.getX() > 350 or self.getX() < -350 or self.getY() > 350 or self.getY() < -350:
             print("ILLEGAL")
@@ -92,24 +97,37 @@ class Piece:
     def showLegalMoves(self):
         #pass
                 
-        self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+100)
+        self.turtle.goto(self.getX(), self.getY()+100)
         
         if self.isMoveLegal():
             self.stampMove()
             self.showingMoves = True
             if self.firstmove:
-                self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+100)
+                self.turtle.goto(self.getX(), self.getY()+100)
                 if self.isMoveLegal():
                     self.stampMove()
-                self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-100)
+                self.turtle.goto(self.getX(), self.getY()-100)
         
-        self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-100)
+        self.turtle.goto(self.getX(), self.getY()-100)
+
+    def showCaptures(self):
+        self.showingMoves = True
+        self.turtle.goto(self.getX()+100, self.getY()+100)
+        for piece in black_pieces:
+            if self.getPos() == piece.getPos():
+                self.stampMove()
+        self.turtle.goto(self.getX()-200, self.getY())
+        for piece in black_pieces:
+            if self.getPos() == piece.getPos():
+                self.stampMove()
+        self.turtle.goto(self.getX()+100, self.getY()-100)
+
+        
 
     def pieceReset(self):
         self.turtle.clearstamps()
         self.possibleMovesX = []
         self.possibleMovesY = []
-        self.possibleMoves = []
         self.showingMoves = False
     
     def isClicked(self, x, y):
@@ -123,58 +141,14 @@ class Piece:
             if x in range(self.possibleMovesX[i] - 50, self.possibleMovesX[i] + 50) and y in range(self.possibleMovesY[i] - 50, self.possibleMovesY[i] + 50):
                 self.turtle.goto(self.possibleMovesX[i], self.possibleMovesY[i])
                 self.firstmove = False
+
+        for piece in black_pieces:
+            if self.getPos() == piece.getPos():
+                piece.turtle.goto(-500, 0)
+
+                
         self.pieceReset()
 
-    '''def showMoves(self):
-        self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+100)
-        pos = self.turtle.xcor(), self.turtle.ycor()
-        badMove = False
-        print("check pos", pos)
-        for piece in white_pieces:
-            if pos == piece.getPos() and self.name != piece.name:
-                print("bad move")
-                badMove = True
-        for piece in black_pieces:
-            if pos == piece.getPos() and self.name != piece.name:
-                print("bad move")
-                badMove = True
-        if not badMove:
-            self.showingMoves = True
-            if pos not in (self.possibleMovesX, self.possibleMovesY):
-                self.possibleMoves.append(pos)
-                self.possibleMovesX.append(self.turtle.xcor())
-                self.possibleMovesY.append(self.turtle.ycor())
-            self.turtle.shape("circle")
-            self.turtle.color("grey") 
-            self.stamp = self.turtle.stamp()        
-            self.turtle.shape(self.team + "_" + self.piece + ".gif")
-        self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-100)
-        
-        if self.firstmove:
-            self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+200)
-            pos = self.turtle.xcor(), self.turtle.ycor()
-            badMove = False
-            
-            for piece in white_pieces:
-                if pos == piece.getPos() and self.name != piece.name:
-                    print("bad move")
-                    badMove = True
-            for piece in black_pieces:
-                if pos == piece.getPos() and self.name != piece.name:
-                    print("bad move")
-                    badMove = True
-            if not badMove:
-                self.showingMoves = True
-                if pos not in (self.possibleMovesX, self.possibleMovesY):
-                    self.possibleMoves.append(pos)
-                    self.possibleMovesX.append(self.turtle.xcor())
-                    self.possibleMovesY.append(self.turtle.ycor())
-                self.turtle.shape("circle")
-                self.turtle.color("grey") 
-                self.stamp2 = self.turtle.stamp()        
-                self.turtle.shape(self.team + "_" + self.piece + ".gif")
-            self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-200)
-        '''    
 
 class Pawn(Piece):
     def __init__(self, turtle, shape, team, posX, posY):
@@ -289,34 +263,7 @@ for piece in piece_setup:
     black_pieces.append(piece)
     x += 100
 
-
-
-
 def clickCheck(x, y):
-    '''
-    for piece in white_pieces or black_pieces:
-        a = True
-        if piece.showingMoves:
-            print(piece.possibleMovesX, piece.possibleMovesY)
-            for i in range(len(piece.possibleMoves)):
-                print(piece.possibleMoves)
-                print(i, piece.possibleMovesX)
-                if x in range(piece.possibleMovesX[i] - 50, piece.possibleMovesX[i] + 50) and y in range(piece.possibleMovesY[i] - 50, piece.possibleMovesY[i] + 50):
-                    piece.turtle.goto(piece.possibleMovesX[i], piece.possibleMovesY[i])
-                    piece.showingMoves = False
-                    piece.firstmove = False
-                    piece.turtle.clearstamp(piece.stamp)
-                    piece.turtle.clearstamp(piece.stamp2)
-                    piece.possibleMovesX = []
-                    piece.possibleMovesY = []
-                else:
-                    piece.possibleMovesX = []
-                    piece.possibleMovesY = []
-                    piece.showingMoves = False
-                    piece.turtle.clearstamp(piece.stamp)
-                    piece.turtle.clearstamp(piece.stamp2)
-            a = False
-    '''
     
     for piece in white_pieces:
         if piece.showingMoves:
@@ -324,6 +271,7 @@ def clickCheck(x, y):
         else:
             if piece.isClicked(x, y):
                 piece.showLegalMoves()
+                piece.showCaptures()
 
 
 wn.onclick(clickCheck)
