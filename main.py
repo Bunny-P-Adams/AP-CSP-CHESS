@@ -72,30 +72,36 @@ class Piece:
 
     def isMoveLegal(self):
         #pass
+        print("checking,.")
         for piece in white_pieces:
-            print(self.getPos(), "\n", piece.getPos())
+            
             if self.getPos() == piece.getPos() and self.name != piece.name:
                 print("ILLEGAL")
                 return False
-            else:
-                print("legal")
-                self.possibleMovesX.append(self.getX())
-                self.possibleMovesY.append(self.getY())
-                return True
-                
+
+        if self.getX() > 350 or self.getX() < -350 or self.getY() > 350 or self.getY() < -350:
+            print("ILLEGAL")
+            return False
+
+        else:
+            print("legal")
+            self.possibleMovesX.append(self.getX())
+            self.possibleMovesY.append(self.getY())
+            return True
 
     def showLegalMoves(self):
         #pass
                 
         self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+100)
+        
         if self.isMoveLegal():
             self.stampMove()
             self.showingMoves = True
             if self.firstmove:
+                self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+100)
                 if self.isMoveLegal():
-                    self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()+100)
                     self.stampMove()
-                    self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-100)
+                self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-100)
         
         self.turtle.goto(self.turtle.xcor(), self.turtle.ycor()-100)
 
