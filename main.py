@@ -23,7 +23,7 @@ black_pieces = []
 
 font_setup = ("Comic Sans MS", 25, "normal")
 
-moves = 0
+toMove = True
 
 wn = t.Screen()
 wn.bgcolor("black")
@@ -86,10 +86,9 @@ class Piece:
         self.possibleMovesX.append(self.getX())
         self.possibleMovesY.append(self.getY())
 
-        self.showingMoves = False
 
     def isClicked(self, x, y):
-        if x in range(self.getX() - 50, self.getX() + 50) and y in range(self.getY() - 50, self.getY() + 50):
+        if x in range(self.turtle.xcor() - 50, self.turtle.xcor() + 50) and y in range(self.turtle.ycor() - 50, self.turtle.ycor() + 50):
             return True
         else:
             return False
@@ -135,35 +134,95 @@ class Piece:
         self.pieceReset()
 
 
-class Pawn(Piece):
+class Pawn():
     def __init__(self, turtle, piece, team, posX, posY):
-        super().__init__(turtle, "pawn", team, posX, posY)
+        self.turtle = turtle
+        self.piece = piece
+        self.team = team
+        self.posX = posX
+        self.posY = posY
+        self.name = self.turtle + self.team
+        self.turtle = t.Turtle()
+        self.shape = self.team + "_" + self.piece + ".gif"
+        self.turtle.shape(self.shape)
+        self.turtle.penup()
+        self.turtle.speed(0)
+        self.turtle.goto(self.posX, self.posY)
+
+        self.firstmove = True
+        self.showingMoves = False
+
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+
+        if self.team == "white":
+            self.allyPieces = white_pieces
+            self.enemyPieces = black_pieces
+            self.m = 100
+        else:
+            self.allyPieces = black_pieces
+            self.enemyPieces = white_pieces
+            self.m = -100
     def getPos(self):
-        super().getPos()
+        return self.turtle.xcor(), self.turtle.ycor()
     def getX(self):
-        super().getX()
+        return self.turtle.xcor()
     def getY(self):
-        super().getY()
+        return self.turtle.ycor()
     def pieceReset(self):
-        super().pieceReset()
+        self.turtle.clearstamps()
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+        self.showingMoves = False
     def stampMove(self):
-        super().stampMove()
+        self.turtle.hideturtle()
+        self.turtle.shape("circle")
+        self.turtle.color("grey") 
+        self.stamp = self.turtle.stamp()
+        
+        self.turtle.shape(self.shape)
+        self.turtle.showturtle()
+
+        
+        self.possibleMovesX.append(self.getX())
+        self.possibleMovesY.append(self.getY())
+
+        self.showingMoves = True
+
     def isClicked(self, x, y):
-        super().isClicked(x, y)
+        #super().isClicked(x, y)
+        if x in range(self.getX() - 50, self.getX() + 50) and y in range(self.getY() - 50, self.getY() + 50):
+            return True
+        else:
+            return False
     def isMoveLegal(self):
-        super().isMoveLegal()
+        
+        for piece in self.allyPieces:
+            if self.getPos() == piece.getPos() and self.name != piece.name:
+                print("ILLEGAL")
+                return False
+
         for piece in self.enemyPieces:
-           if self.getPos() == piece.getPos() and self.name != piece.name:
-               print("ILLEGAL")
-               return False
+          if self.getPos() == piece.getPos() and self.name != piece.name:
+              print("ILLEGAL")
+              return False
+
+        if self.getX() > 350 or self.getX() < -350 or self.getY() > 350 or self.getY() < -350:
+            print("ILLEGAL")
+            return False
+
+        else:
+            print("legal")
+            return True
+       
 
     def showLegalMoves(self):
         
+        print("SHOWING")
         self.turtle.goto(self.getX(), self.getY()+self.m)
         
         if self.isMoveLegal():
             self.stampMove()
-            self.showingMoves = True
             if self.firstmove:
                 self.turtle.goto(self.getX(), self.getY()+self.m)
                 if self.isMoveLegal():
@@ -177,7 +236,6 @@ class Pawn(Piece):
     def showPawnCaptures(self):
         self.startPos = self.getPos()
 
-        self.showingMoves = True
         self.turtle.goto(self.getX()+self.m, self.getY()+self.m)
         for piece in self.enemyPieces:
             if self.getPos() == piece.getPos():
@@ -190,32 +248,116 @@ class Pawn(Piece):
         self.turtle.goto(self.startPos)
 
     def move(self, x, y):
-        super().move(x, y)
+        global toMove
+        for i in range(len(self.possibleMovesX)):
+            print (self.possibleMovesX, self.possibleMovesY)
+            if x in range(self.possibleMovesX[i] - 50, self.possibleMovesX[i] + 50) and y in range(self.possibleMovesY[i] - 50, self.possibleMovesY[i] + 50):
+                self.turtle.goto(self.possibleMovesX[i], self.possibleMovesY[i])
+                self.firstmove = False
+                toMove = not toMove
+
+        
+        for piece in self.enemyPieces:
+            if self.getPos() == piece.getPos():
+                piece.turtle.goto(-500, 0)
+                  
+        self.pieceReset()
 
     
-class Bishop(Piece):
+class Bishop():
+    
     
     def __init__(self, turtle, piece, team, posX, posY):
-        super().__init__(turtle, "bishop", team, posX, posY)
+        self.turtle = turtle
+        self.piece = piece
+        self.team = team
+        self.posX = posX
+        self.posY = posY
+        self.name = self.turtle + self.team
+        self.turtle = t.Turtle()
+        self.shape = self.team + "_" + self.piece + ".gif"
+        self.turtle.shape(self.shape)
+        self.turtle.penup()
+        self.turtle.speed(0)
+        self.turtle.goto(self.posX, self.posY)
+
+        self.firstmove = True
+        self.showingMoves = False
+
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+
+        if self.team == "white":
+            self.allyPieces = white_pieces
+            self.enemyPieces = black_pieces
+            self.m = 100
+        else:
+            self.allyPieces = black_pieces
+            self.enemyPieces = white_pieces
+            self.m = -100
+
     def getPos(self):
-        super().getPos()
+        return self.turtle.xcor(), self.turtle.ycor()
     def getX(self):
-        super().getX()
+        return self.turtle.xcor()
     def getY(self):
-        super().getY()
+        return self.turtle.ycor()
+
     def pieceReset(self):
-        super().pieceReset()
+        self.turtle.clearstamps()
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+        self.showingMoves = False
+
     def stampMove(self):
-        super().stampMove()
+        self.turtle.hideturtle()
+        self.turtle.shape("circle")
+        self.turtle.color("grey") 
+        self.stamp = self.turtle.stamp()
+        
+        self.turtle.shape(self.shape)
+        self.turtle.showturtle()
+
+        
+        self.possibleMovesX.append(self.getX())
+        self.possibleMovesY.append(self.getY())
+
+        self.showingMoves = True
+
+
     def isClicked(self, x, y):
-        super().isClicked(x, y)
+        if x in range(self.turtle.xcor() - 50, self.turtle.xcor() + 50) and y in range(self.turtle.ycor() - 50, self.turtle.ycor() + 50):
+            return True
+        else:
+            return False
+
     def isMoveLegal(self):
-        super().isMoveLegal()
+        
+        print("checking...")
+        for piece in self.allyPieces:
+            if self.getPos() == piece.getPos() and self.name != piece.name:
+                print("ILLEGAL")
+                return False
+        
+        for piece in self.enemyPieces:
+          if self.getPos() == piece.getPos() and self.name != piece.name:
+              print("CAPTURE")
+              self.stampMove()
+              return False
+
+        if self.getX() > 350 or self.getX() < -350 or self.getY() > 350 or self.getY() < -350:
+            print("ILLEGAL")
+            return False
+
+        else:
+            print("legal")
+            return True
     def showLegalMoves(self):
+
         self.startPos = self.getPos()
 
         for i in range(8):
-            self.turtle.goto(self.getX()+100, self.getY()+self+100)
+            self.turtle.goto(self.getX()+100, self.getY()+100)
             if self.isMoveLegal():
                 self.stampMove()
             if not self.isMoveLegal():
@@ -224,54 +366,134 @@ class Bishop(Piece):
         self.turtle.goto(self.startPos)
 
         for i in range(8):
-            self.turtle.goto(self.getX()-100, self.getY()+self+100)
+            self.turtle.goto(self.getX()+100, self.getY()-100)
             if self.isMoveLegal():
                 self.stampMove()
             if not self.isMoveLegal():
                 break
-        
+
         self.turtle.goto(self.startPos)
 
         for i in range(8):
-            self.turtle.goto(self.getX()+100, self.getY()-self+100)
+            self.turtle.goto(self.getX()-100, self.getY()+100)
             if self.isMoveLegal():
                 self.stampMove()
             if not self.isMoveLegal():
                 break
 
         self.turtle.goto(self.startPos)
-        
+
         for i in range(8):
-            self.turtle.goto(self.getX()-100, self.getY()+self-100)
+            self.turtle.goto(self.getX()-100, self.getY()-100)
             if self.isMoveLegal():
                 self.stampMove()
             if not self.isMoveLegal():
                 break
 
+
         self.turtle.goto(self.startPos)
+
+
 
     def move(self, x, y):
-        super().move(x, y)
+        global toMove
+        for i in range(len(self.possibleMovesX)):
+            print (self.possibleMovesX, self.possibleMovesY)
+            if x in range(self.possibleMovesX[i] - 50, self.possibleMovesX[i] + 50) and y in range(self.possibleMovesY[i] - 50, self.possibleMovesY[i] + 50):
+                self.turtle.goto(self.possibleMovesX[i], self.possibleMovesY[i])
+                self.firstmove = False
+                toMove = not toMove
 
-class Knight(Piece):
+        
+        for piece in self.enemyPieces:
+            if self.getPos() == piece.getPos():
+                piece.turtle.goto(-500, 0)
+                  
+        self.pieceReset()
 
+
+class Knight():
     def __init__(self, turtle, piece, team, posX, posY):
-        super().__init__(turtle, "knight", team, posX, posY)
+        self.turtle = turtle
+        self.piece = piece
+        self.team = team
+        self.posX = posX
+        self.posY = posY
+        self.name = self.turtle + self.team
+        self.turtle = t.Turtle()
+        self.shape = self.team + "_" + self.piece + ".gif"
+        self.turtle.shape(self.shape)
+        self.turtle.penup()
+        self.turtle.speed(0)
+        self.turtle.goto(self.posX, self.posY)
+
+        self.firstmove = True
+        self.showingMoves = False
+
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+
+        if self.team == "white":
+            self.allyPieces = white_pieces
+            self.enemyPieces = black_pieces
+            self.m = 100
+        else:
+            self.allyPieces = black_pieces
+            self.enemyPieces = white_pieces
+            self.m = -100
+
     def getPos(self):
-        super().getPos()
+        return self.turtle.xcor(), self.turtle.ycor()
     def getX(self):
-        super().getX()
+        return self.turtle.xcor()
     def getY(self):
-        super().getY()
+        return self.turtle.ycor()
+
     def pieceReset(self):
-        super().pieceReset()
+        self.turtle.clearstamps()
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+        self.showingMoves = False
+
     def stampMove(self):
-        super().stampMove()
+        self.turtle.hideturtle()
+        self.turtle.shape("circle")
+        self.turtle.color("grey") 
+        self.stamp = self.turtle.stamp()
+        
+        self.turtle.shape(self.shape)
+        self.turtle.showturtle()
+
+        
+        self.possibleMovesX.append(self.getX())
+        self.possibleMovesY.append(self.getY())
+
+        self.showingMoves = True
+
+
     def isClicked(self, x, y):
-        super().isClicked(x, y)
+        if x in range(self.turtle.xcor() - 50, self.turtle.xcor() + 50) and y in range(self.turtle.ycor() - 50, self.turtle.ycor() + 50):
+            return True
+        else:
+            return False
+
     def isMoveLegal(self):
-        super().isMoveLegal()
+        
+        print("checking...")
+        for piece in self.allyPieces:
+            if self.getPos() == piece.getPos() and self.name != piece.name:
+                print("ILLEGAL")
+                return False
+
+        if self.getX() > 350 or self.getX() < -350 or self.getY() > 350 or self.getY() < -350:
+            print("ILLEGAL")
+            return False
+
+        else:
+            print("legal")
+            return True
     def showLegalMoves(self):
+
         self.startPos = self.getPos()
 
         self.turtle.goto(self.getX()+100, self.getY()+200)
@@ -308,26 +530,244 @@ class Knight(Piece):
         self.turtle.goto(self.startPos)
         
     def move(self, x, y):
-        super().move(x, y)
+        global toMove
+        for i in range(len(self.possibleMovesX)):
+            print (self.possibleMovesX, self.possibleMovesY)
+            if x in range(self.possibleMovesX[i] - 50, self.possibleMovesX[i] + 50) and y in range(self.possibleMovesY[i] - 50, self.possibleMovesY[i] + 50):
+                self.turtle.goto(self.possibleMovesX[i], self.possibleMovesY[i])
+                self.firstmove = False
+                toMove = not toMove
 
-class Rook(Piece):
-    
+        
+        for piece in self.enemyPieces:
+            if self.getPos() == piece.getPos():
+                piece.turtle.goto(-500, 0)
+                  
+        self.pieceReset()
+
+
+class Rook():
     def __init__(self, turtle, piece, team, posX, posY):
-        super().__init__(turtle, "rook", team, posX, posY)
+        self.turtle = turtle
+        self.piece = piece
+        self.team = team
+        self.posX = posX
+        self.posY = posY
+        self.name = self.turtle + self.team
+        self.turtle = t.Turtle()
+        self.shape = self.team + "_" + self.piece + ".gif"
+        self.turtle.shape(self.shape)
+        self.turtle.penup()
+        self.turtle.speed(0)
+        self.turtle.goto(self.posX, self.posY)
+
+        self.firstmove = True
+        self.showingMoves = False
+
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+
+        if self.team == "white":
+            self.allyPieces = white_pieces
+            self.enemyPieces = black_pieces
+            self.m = 100
+        else:
+            self.allyPieces = black_pieces
+            self.enemyPieces = white_pieces
+            self.m = -100
+
     def getPos(self):
-        super().getPos()
+        return self.turtle.xcor(), self.turtle.ycor()
     def getX(self):
-        super().getX()
+        return self.turtle.xcor()
     def getY(self):
-        super().getY()
+        return self.turtle.ycor()
+
     def pieceReset(self):
-        super().pieceReset()
+        self.turtle.clearstamps()
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+        self.showingMoves = False
+
     def stampMove(self):
-        super().stampMove()
+        self.turtle.hideturtle()
+        self.turtle.shape("circle")
+        self.turtle.color("grey") 
+        self.stamp = self.turtle.stamp()
+        
+        self.turtle.shape(self.shape)
+        self.turtle.showturtle()
+
+        
+        self.possibleMovesX.append(self.getX())
+        self.possibleMovesY.append(self.getY())
+
+        self.showingMoves = True
+
+
     def isClicked(self, x, y):
-        super().isClicked(x, y)
+        if x in range(self.turtle.xcor() - 50, self.turtle.xcor() + 50) and y in range(self.turtle.ycor() - 50, self.turtle.ycor() + 50):
+            return True
+        else:
+            return False
+
     def isMoveLegal(self):
-        super().isMoveLegal()
+        
+        print("checking...")
+        for piece in self.allyPieces:
+            if self.getPos() == piece.getPos() and self.name != piece.name:
+                print("ILLEGAL")
+                return False
+        
+        for piece in self.enemyPieces:
+          if self.getPos() == piece.getPos() and self.name != piece.name:
+              print("CAPTURE")
+              self.stampMove()
+              return False
+
+        if self.getX() > 350 or self.getX() < -350 or self.getY() > 350 or self.getY() < -350:
+            print("ILLEGAL")
+            return False
+
+        else:
+            print("legal")
+            return True
+    def showLegalMoves(self):
+
+        self.startPos = self.getPos()
+
+        for i in range(8):
+            self.turtle.goto(self.getX(), self.getY()+100)
+            if self.isMoveLegal():
+                self.stampMove()
+            if not self.isMoveLegal():
+                break
+        self.turtle.goto(self.startPos)
+        for i in range(8):
+            self.turtle.goto(self.getX(), self.getY()-100)
+            if self.isMoveLegal():
+                self.stampMove()
+            if not self.isMoveLegal():
+                break
+        self.turtle.goto(self.startPos)
+        for i in range(8):
+            self.turtle.goto(self.getX()+100, self.getY())
+            if self.isMoveLegal():
+                self.stampMove()
+            if not self.isMoveLegal():
+                break
+        self.turtle.goto(self.startPos)
+        for i in range(8):
+            self.turtle.goto(self.getX()-100, self.getY())
+            if self.isMoveLegal():
+                self.stampMove()
+            if not self.isMoveLegal():
+                break
+        self.turtle.goto(self.startPos)
+
+        
+    def move(self, x, y):
+        global toMove
+        for i in range(len(self.possibleMovesX)):
+            print (self.possibleMovesX, self.possibleMovesY)
+            if x in range(self.possibleMovesX[i] - 50, self.possibleMovesX[i] + 50) and y in range(self.possibleMovesY[i] - 50, self.possibleMovesY[i] + 50):
+                self.turtle.goto(self.possibleMovesX[i], self.possibleMovesY[i])
+                self.firstmove = False
+                toMove = not toMove
+
+        
+        for piece in self.enemyPieces:
+            if self.getPos() == piece.getPos():
+                piece.turtle.goto(-500, 0)
+                  
+        self.pieceReset()
+
+class Queen():
+    def __init__(self, turtle, piece, team, posX, posY):
+        self.turtle = turtle
+        self.piece = piece
+        self.team = team
+        self.posX = posX
+        self.posY = posY
+        self.name = self.turtle + self.team
+        self.turtle = t.Turtle()
+        self.shape = self.team + "_" + self.piece + ".gif"
+        self.turtle.shape(self.shape)
+        self.turtle.penup()
+        self.turtle.speed(0)
+        self.turtle.goto(self.posX, self.posY)
+
+        self.firstmove = True
+        self.showingMoves = False
+
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+
+        if self.team == "white":
+            self.allyPieces = white_pieces
+            self.enemyPieces = black_pieces
+            self.m = 100
+        else:
+            self.allyPieces = black_pieces
+            self.enemyPieces = white_pieces
+            self.m = -100
+
+    def getPos(self):
+        return self.turtle.xcor(), self.turtle.ycor()
+    def getX(self):
+        return self.turtle.xcor()
+    def getY(self):
+        return self.turtle.ycor()
+
+    def pieceReset(self):
+        self.turtle.clearstamps()
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+        self.showingMoves = False
+
+    def stampMove(self):
+        self.turtle.hideturtle()
+        self.turtle.shape("circle")
+        self.turtle.color("grey") 
+        self.stamp = self.turtle.stamp()
+        
+        self.turtle.shape(self.shape)
+        self.turtle.showturtle()
+
+        
+        self.possibleMovesX.append(self.getX())
+        self.possibleMovesY.append(self.getY())
+
+        self.showingMoves = True
+
+
+    def isClicked(self, x, y):
+        if x in range(self.turtle.xcor() - 50, self.turtle.xcor() + 50) and y in range(self.turtle.ycor() - 50, self.turtle.ycor() + 50):
+            return True
+        else:
+            return False
+
+    def isMoveLegal(self):
+        
+        print("checking...")
+        for piece in self.allyPieces:
+            if self.getPos() == piece.getPos() and self.name != piece.name:
+                print("ILLEGAL")
+                return False
+        
+        for piece in self.enemyPieces:
+          if self.getPos() == piece.getPos() and self.name != piece.name:
+              print("CAPTURE")
+              self.stampMove()
+              return False
+
+        if self.getX() > 350 or self.getX() < -350 or self.getY() > 350 or self.getY() < -350:
+            print("ILLEGAL")
+            return False
+
+        else:
+            print("legal")
+            return True
     def showLegalMoves(self):
         self.startPos = self.getPos()
 
@@ -360,122 +800,167 @@ class Rook(Piece):
                 break
         self.turtle.goto(self.startPos)
 
-    def move(self, x, y):
-        super().move(x, y)
+        
+        for i in range(8):
+            self.turtle.goto(self.getX()+100, self.getY()+100)
+            if self.isMoveLegal():
+                self.stampMove()
+            if not self.isMoveLegal():
+                break
 
-class Queen(Piece):
+        self.turtle.goto(self.startPos)
+
+        for i in range(8):
+            self.turtle.goto(self.getX()-100, self.getY()+100)
+            if self.isMoveLegal():
+                self.stampMove()
+            if not self.isMoveLegal():
+                break
+        
+        self.turtle.goto(self.startPos)
+
+        for i in range(8):
+            self.turtle.goto(self.getX()+100, self.getY()-100)
+            if self.isMoveLegal():
+                self.stampMove()
+            if not self.isMoveLegal():
+                break
+
+        self.turtle.goto(self.startPos)
+        
+        for i in range(8):
+            self.turtle.goto(self.getX()-100, self.getY()-100)
+            if self.isMoveLegal():
+                self.stampMove()
+            if not self.isMoveLegal():
+                break
+        
+        self.turtle.goto(self.startPos)
+
+        
+    def move(self, x, y):
+        global toMove
+        for i in range(len(self.possibleMovesX)):
+            print (self.possibleMovesX, self.possibleMovesY)
+            if x in range(self.possibleMovesX[i] - 50, self.possibleMovesX[i] + 50) and y in range(self.possibleMovesY[i] - 50, self.possibleMovesY[i] + 50):
+                self.turtle.goto(self.possibleMovesX[i], self.possibleMovesY[i])
+                self.firstmove = False
+                toMove = not toMove
+
+        
+        for piece in self.enemyPieces:
+            if self.getPos() == piece.getPos():
+                piece.turtle.goto(-500, 0)
+                  
+        self.pieceReset()
+
+class King():
+    def __init__(self, turtle, piece, team, posX, posY):
+        self.turtle = turtle
+        self.piece = piece
+        self.team = team
+        self.posX = posX
+        self.posY = posY
+        self.name = self.turtle + self.team
+        self.turtle = t.Turtle()
+        self.shape = self.team + "_" + self.piece + ".gif"
+        self.turtle.shape(self.shape)
+        self.turtle.penup()
+        self.turtle.speed(0)
+        self.turtle.goto(self.posX, self.posY)
+
+        self.firstmove = True
+        self.showingMoves = False
+        self.inCheck = False  
+
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+
+        if self.team == "white":
+            self.allyPieces = white_pieces
+            self.enemyPieces = black_pieces
+            self.m = 100
+        else:
+            self.allyPieces = black_pieces
+            self.enemyPieces = white_pieces
+            self.m = -100
+
+    def getPos(self):
+        return self.turtle.xcor(), self.turtle.ycor()
+    def getX(self):
+        return self.turtle.xcor()
+    def getY(self):
+        return self.turtle.ycor()
+
+    def pieceReset(self):
+        self.turtle.clearstamps()
+        self.possibleMovesX = []
+        self.possibleMovesY = []
+        self.showingMoves = False
+
+    def stampMove(self):
+        self.turtle.hideturtle()
+        self.turtle.shape("circle")
+        self.turtle.color("grey") 
+        self.stamp = self.turtle.stamp()
+        
+        self.turtle.shape(self.shape)
+        self.turtle.showturtle()
+
+        
+        self.possibleMovesX.append(self.getX())
+        self.possibleMovesY.append(self.getY())
+
+        self.showingMoves = True
+
+
+    def isClicked(self, x, y):
+        if x in range(self.turtle.xcor() - 50, self.turtle.xcor() + 50) and y in range(self.turtle.ycor() - 50, self.turtle.ycor() + 50):
+            return True
+        else:
+            return False
+
+    def isMoveLegal(self):
+        
+        print("checking...")
+        for piece in self.allyPieces:
+            if self.getPos() == piece.getPos() and self.name != piece.name:
+                print("ILLEGAL")
+                return False
+        
+        for piece in self.enemyPieces:
+          if self.getPos() == piece.getPos() and self.name != piece.name:
+              print("CAPTURE")
+              self.stampMove()
+              return False
+
+        if self.getX() > 350 or self.getX() < -350 or self.getY() > 350 or self.getY() < -350:
+            print("ILLEGAL")
+            return False
+
+        else:
+            print("legal")
+            return True
+    def showLegalMoves(self):
+        self.startPos = self.getPos()
+
+
     
-    def __init__(self, turtle, piece, team, posX, posY):
-        super().__init__(turtle, "queen", team, posX, posY)
-    def getPos(self):
-        super().getPos()
-    def getX(self):
-        super().getX()
-    def getY(self):
-        super().getY()
-    def pieceReset(self):
-        super().pieceReset()
-    def stampMove(self):
-        super().stampMove()
-    def isClicked(self, x, y):
-        super().isClicked(x, y)
-    def isMoveLegal(self):
-        super().isMoveLegal()
-    def showLegalMoves(self):
-        self.startPos = self.getPos()
-
-        for i in range(8):
-            self.turtle.goto(self.getX(), self.getY()+100)
-            if self.isMoveLegal():
-                self.stampMove()
-            if not self.isMoveLegal():
-                break
-        self.turtle.goto(self.startPos)
-        for i in range(8):
-            self.turtle.goto(self.getX(), self.getY()-100)
-            if self.isMoveLegal():
-                self.stampMove()
-            if not self.isMoveLegal():
-                break
-        self.turtle.goto(self.startPos)
-        for i in range(8):
-            self.turtle.goto(self.getX()+100, self.getY())
-            if self.isMoveLegal():
-                self.stampMove()
-            if not self.isMoveLegal():
-                break
-        self.turtle.goto(self.startPos)
-        for i in range(8):
-            self.turtle.goto(self.getX()-100, self.getY())
-            if self.isMoveLegal():
-                self.stampMove()
-            if not self.isMoveLegal():
-                break
-        self.turtle.goto(self.startPos)
-
-        
-        for i in range(8):
-            self.turtle.goto(self.getX()+100, self.getY()+self+100)
-            if self.isMoveLegal():
-                self.stampMove()
-            if not self.isMoveLegal():
-                break
-
-        self.turtle.goto(self.startPos)
-
-        for i in range(8):
-            self.turtle.goto(self.getX()-100, self.getY()+self+100)
-            if self.isMoveLegal():
-                self.stampMove()
-            if not self.isMoveLegal():
-                break
-        
-        self.turtle.goto(self.startPos)
-
-        for i in range(8):
-            self.turtle.goto(self.getX()+100, self.getY()-self+100)
-            if self.isMoveLegal():
-                self.stampMove()
-            if not self.isMoveLegal():
-                break
-
-        self.turtle.goto(self.startPos)
-        
-        for i in range(8):
-            self.turtle.goto(self.getX()-100, self.getY()+self-100)
-            if self.isMoveLegal():
-                self.stampMove()
-            if not self.isMoveLegal():
-                break
     def move(self, x, y):
-        super().move(x, y)
-
-class King(Piece):
-    def __init__(self, turtle, piece, team, posX, posY):
-        super().__init__(turtle, "king", team, posX, posY)
-        self.Check = False
-    def getPos(self):
-        super().getPos()
-    def getX(self):
-        super().getX()
-    def getY(self):
-        super().getY()
-    def pieceReset(self):
-        super().pieceReset()
-    def stampMove(self):
-        super().stampMove()
-    def isClicked(self, x, y):
-        super().isClicked(x, y)
-    def isMoveLegal(self):
-        super().isMoveLegal()
-    def showLegalMoves(self):
-        self.startPos = self.getPos()
+        global toMove
+        for i in range(len(self.possibleMovesX)):
+            print (self.possibleMovesX, self.possibleMovesY)
+            if x in range(self.possibleMovesX[i] - 50, self.possibleMovesX[i] + 50) and y in range(self.possibleMovesY[i] - 50, self.possibleMovesY[i] + 50):
+                self.turtle.goto(self.possibleMovesX[i], self.possibleMovesY[i])
+                self.firstmove = False
+                toMove = not toMove
 
         
-        self.turtle.goto(self.startPos)
-
-    def move(self, x, y):
-        super().move(x, y)
+        for piece in self.enemyPieces:
+            if self.getPos() == piece.getPos():
+                piece.turtle.goto(-500, 0)
+                  
+        self.pieceReset()
     
 
 xcor = -350
@@ -595,8 +1080,8 @@ for piece in piece_setup:
 
 
 def clickCheck(x, y):
-    print(moves)
-    if moves % 2 == 0:
+    print(toMove)
+    if toMove:
         pieces = white_pieces
     else:
         pieces = black_pieces
