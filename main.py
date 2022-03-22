@@ -46,6 +46,7 @@ class Piece:
         self.turtle.goto(self.posX, self.posY)
         self.firstmove = True
         self.showingMoves = False
+        self.alive = True
         self.possibleMovesX = []
         self.possibleMovesY = []
 
@@ -82,10 +83,17 @@ class Piece:
         self.possibleMovesY.append(self.getY())
         self.showingMoves = True
 
-    def legalMoves(self, x, y):
+    def basicMove(self, x, y):
+        self.startPos = self.getPos()
+        self.turtle.goto(self.getX()+100*x, self.getY()+100*y)
+        if self.isMoveLegal():
+            self.stampMove()
+        self.turtle.goto(self.startPos)
+
+    def axisMoves(self, x, y):
         self.startPos = self.getPos()
         for i in range(8):
-            self.turtle.goto(self.getX()+x, self.getY()+y)
+            self.turtle.goto(self.getX()+100*x, self.getY()+100*y)
             if self.isMoveLegal():
                 self.stampMove()
             if not self.isMoveLegal():
@@ -134,6 +142,7 @@ class Piece:
       
         for piece in self.enemyPieces:
             if self.getPos() == piece.getPos():
+                piece.alive = False
                 piece.turtle.goto(-500, 0)
             else: 
                 if self.getPos() == (piece.getX(), piece.getY()+100*self.pawnDirection) and piece.piece == "pawn" and piece.enPassantAble:
@@ -189,61 +198,92 @@ class Bishop(Piece):
         super().__init__(turtle, piece, team, posX, posY)
 
     def showLegalMoves(self):
-        self.legalMoves(100, 100)
-        self.legalMoves(100, -100)
-        self.legalMoves(-100, 100)
-        self.legalMoves(-100, -100)
+        self.axisMoves(1, 1)
+        self.axisMoves(1, -1)
+        self.axisMoves(-1, 1)
+        self.axisMoves(-1, -1)
 
 class Knight(Piece):
     def __init__(self, turtle, piece, team, posX, posY):
         super().__init__(turtle, piece, team, posX, posY)
 
-    def knightMove(self, x, y):
-        self.startPos = self.getPos()
-        self.turtle.goto(self.getX()+x, self.getY()+y)
-        if self.isMoveLegal():
-            self.stampMove()
-        self.turtle.goto(self.startPos)
-
     def showLegalMoves(self):
-        self.knightMove(100, 200)
-        self.knightMove(-100, 200)
-        self.knightMove(100, -200)
-        self.knightMove(-100, -200)
-        self.knightMove(200, 100)
-        self.knightMove(-200, 100)
-        self.knightMove(200, -100)
-        self.knightMove(-200, -100)
+        self.basicMove(1, 2)
+        self.basicMove(-1, 2)
+        self.basicMove(1, -2)
+        self.basicMove(-1, -2)
+        self.basicMove(2, 1)
+        self.basicMove(-2, 1)
+        self.basicMove(2, -1)
+        self.basicMove(-2, -1)
         
 class Rook(Piece):
     def __init__(self, turtle, piece, team, posX, posY):
         super().__init__(turtle, piece, team, posX, posY)
 
     def showLegalMoves(self):
-        self.legalMoves(0, 100)
-        self.legalMoves(0, -100)
-        self.legalMoves(100, 0)
-        self.legalMoves(-100, 0)
+        self.axisMoves(0, 1)
+        self.axisMoves(0, -1)
+        self.axisMoves(1, 0)
+        self.axisMoves(-1, 0)
 
 class Queen(Piece):
     def __init__(self, turtle, piece, team, posX, posY):
         super().__init__(turtle, piece, team, posX, posY)
         
     def showLegalMoves(self):
-        self.legalMoves(100, 100)
-        self.legalMoves(100, -100)
-        self.legalMoves(-100, 100)
-        self.legalMoves(-100, -100)        
-        self.legalMoves(0, 100)
-        self.legalMoves(0, -100)
-        self.legalMoves(100, 0)
-        self.legalMoves(-100, 0)
+        self.axisMoves(1, 1)
+        self.axisMoves(1, -1)
+        self.axisMoves(-1, 1)
+        self.axisMoves(-1, -1)        
+        self.axisMoves(0, 1)
+        self.axisMoves(0, -1)
+        self.axisMoves(1, 0)
+        self.axisMoves(-1, 0)
 
 class King(Piece):
     def __init__(self, turtle, piece, team, posX, posY):
         super().__init__(turtle, piece, team, posX, posY)
+    
+    def castle(self):
+        x = self.getX()
+        y = self.getY()
+        start = (x, y)
+        for piece in self.allyPieces:
+            print(piece.name)
+            if piece.name[:5] == "arook":
+                if piece.firstmove:
+                    self.turtle.goto(x-100, y)
+                    if self.isMoveLegal():
+                        self.turtle.goto(x-200, y)
+                        if self.isMoveLegal():
+                            self.turtle.goto(x-300, y)
+                            if self.isMoveLegal():
+                                self.turtle.goto(x-200, y)
+                                self.stampMove()
+                self.turtle.goto(start)
+            if piece.name[:5] == "hrook":
+                if piece.firstmove:
+                    self.turtle.goto(x+100, y)
+                    if self.isMoveLegal():
+                        self.turtle.goto(x+200, y)
+                        if self.isMoveLegal():
+                            self.stampMove()
+                self.turtle.goto(start)
+
+
+            
     def showLegalMoves(self):
-        pass
+        self.basicMove(1, 0)
+        self.basicMove(0, 1)
+        self.basicMove(1, 1)
+        self.basicMove(-1, 0)
+        self.basicMove(0, -1)
+        self.basicMove(-1, -1)
+        self.basicMove(1, -1)
+        self.basicMove(-1, 1)
+        if self.firstmove:
+            self.castle()
 
 xcor = -350
 ycor = 350
