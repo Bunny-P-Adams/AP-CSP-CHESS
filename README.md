@@ -1,2 +1,2 @@
 # AP-CSP-CHESS
-Chess in the python turtle library for AP CSP create task command
+Chess with the python turtle library for AP CSP create task
