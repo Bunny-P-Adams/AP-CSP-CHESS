@@ -181,7 +181,15 @@ class Pawn(Piece):
                 self.turtle.goto(piece.getX(), piece.getY()+100*self.pawnDirection)
                 self.stampMove()
                 self.turtle.goto(self.startPos)
-                
+
+    def pawnPromotion(self):
+        if (self.getY() == 350*self.pawnDirection):
+            a = input("What do you want to promote the pawn to: bishop, knight, rook, queen")
+            piece = Bishop(piece, "bishop", self.team, self.getX()-150, self.getY+(100*self.pawnDirection))
+            piece = Knight(piece, "knight", self.team, self.getX()-50, self.getY+(100*self.pawnDirection))
+            piece = Rook(piece, "rook", self.team, self.getX()+50, self.getY+(100*self.pawnDirection))
+            piece = Queen(piece, "queen", self.team, self.getX()+150, self.getY+(100*self.pawnDirection))
+            
     def move(self, x, y):
         if self.firstmove:
             self.enPassantAble = True
@@ -242,16 +250,17 @@ class King(Piece):
         super().__init__(turtle, piece, team, posX, posY)
     
     def inCheck(self):
-        print(self.enemyPieces)
+        #print(self.enemyPieces)
         for piece in self.enemyPieces:
             print(1)
-            piece.showLegalMoves()
+            if (piece.piece != "king"):
+                piece.showLegalMoves()
             for i in range(len(piece.possibleMovesX)):
                 if(self.getX == piece.possibleMovesX[i] and self.getY == piece.possibleMovesY[i]):
                     print("IN CHECK")
                     piece.pieceReset()
                     return True
-        piece.pieceReset()
+            piece.pieceReset()
         return False
            
     
@@ -410,11 +419,16 @@ def clickCheck(x, y):
         pieces = black_pieces
 
     for piece in pieces:
-        if piece.showingMoves:
-            piece.move(x, y)
-        else:
-            if piece.isClicked(x, y):
-                piece.showLegalMoves()
+        if (piece.piece == "king"):
+            if piece.alive:
+                for piece in pieces:
+                    if piece.showingMoves:
+                        piece.move(x, y)
+                    else:
+                        if piece.isClicked(x, y):
+                            piece.showLegalMoves()
+            else:
+                print("GAME OVER. \n", toMove, " loses.")
 
 wn.onclick(clickCheck)
 wn.mainloop()
