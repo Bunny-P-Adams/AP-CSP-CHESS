@@ -200,13 +200,11 @@ class Pawn(Piece):
                 
             self.turtle.goto(-500, 0)
             self.allyPieces.append(piece)
-            piece.turtle.clearstamps()
+            piece.showingMoves = True
             
     def move(self, x, y):
         if self.firstMove:
             self.enPassantAble = True
-        # else:
-        #     self.enPassantAble = False
         
         super().move(x, y)
         
@@ -263,6 +261,8 @@ class Queen(Piece):
 class King(Piece):
     def __init__(self, turtle, piece, team, posX, posY):
         super().__init__(turtle, piece, team, posX, posY)
+        self.queenSideCastle = 0
+        self.kingSideCastle = 0
     
     def castle(self):
         x = self.getX()
@@ -305,6 +305,9 @@ class King(Piece):
         self.basicMove(-1, 1)
         if self.firstMove:
             self.castle()
+        else:
+            self.queenSideCastle = 0
+            self.kingSideCastle = 0
     
     def move(self, x, y):
         super().move(x, y)
@@ -442,7 +445,7 @@ def clickCheck(x, y):
                             piece.showLegalMoves()
             else:
                 t.Screen().bye()
-                print("\n GAME OVER. \n", toMove, " loses.")
+                print("\n GAME OVER \n", toMove, " loses.")
 
 wn.onclick(clickCheck)
 wn.mainloop()
