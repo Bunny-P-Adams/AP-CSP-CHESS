@@ -127,22 +127,24 @@ class Piece:
         for i in range(len(self.possibleMovesX)):
             if x in range(self.possibleMovesX[i] - 50, self.possibleMovesX[i] + 50) and y in range(self.possibleMovesY[i] - 50, self.possibleMovesY[i] + 50):
                 self.turtle.goto(self.possibleMovesX[i], self.possibleMovesY[i])
+    
                 self.firstMove = False
                 if self.team == "white":
                     toMove = "black"
                 else:
                     toMove = "white"
+                
       
-        for piece in self.enemyPieces:
-            if self.getPos() == piece.getPos():
-                piece.alive = False
-                piece.turtle.goto(-500, 0)
-            else: 
-                if self.getPos() == (piece.getX(), piece.getY()+100*self.pawnDirection) and self.piece == "pawn" and piece.piece == "pawn" and piece.enPassantAble:
-                    piece.turtle.goto(-500, 0)
-                    print(piece.getX(), piece.getY()-100)
-                    print(self.getPos())
-            piece.enPassantAble = False
+                for piece in self.enemyPieces:
+                    if self.getPos() == piece.getPos():
+                        piece.alive = False
+                        piece.turtle.goto(-500, 0)
+                    
+                    elif self.getPos() == (piece.getX(), piece.getY()+100*self.pawnDirection) and self.piece == "pawn" and piece.piece == "pawn" and piece.enPassantAble:
+                        piece.turtle.goto(-500, 0)
+                    
+                    piece.enPassantAble = False
+                
 
         self.pieceReset()
 
@@ -176,7 +178,7 @@ class Pawn(Piece):
     
     def enPassantCheck(self):
         for piece in self.enemyPieces:
-            if self.getPos() == ((piece.getX()+100, piece.getY()) or self.getPos() == (piece.getX()-100, piece.getY())) and self.piece == "pawn" and piece.piece == "pawn" and piece.enPassantAble: 
+            if (self.getPos() == (piece.getX()+100, piece.getY()) or self.getPos() == (piece.getX()-100, piece.getY())) and self.piece == "pawn" and piece.piece == "pawn" and piece.enPassantAble: 
                 self.startPos = self.getPos()
                 self.turtle.goto(piece.getX(), piece.getY()+100*self.pawnDirection)
                 self.stampMove()
@@ -184,32 +186,30 @@ class Pawn(Piece):
 
     def pawnPromotion(self):
         if (self.getY() == 350*self.pawnDirection):
-            a = input("What do you want to promote the pawn to: bishop, knight, rook, queen")
+            a = input("What do you want to promote the pawn to?(bishop, knight, rook, queen)\n")
             if (a.lower() == "bishop"):
-                piece = Bishop(piece, "bishop", self.team, self.getX(), self.getY())
-                self.allyPieces.append(piece)
-                self.turtle.goto(-500, 0)
+                piece = Bishop("pbishop", "bishop", self.team, self.getX(), self.getY())
             elif (a.lower() == "knight"):
-                piece = Knight(piece, "knight", self.team, self.getX(), self.getY())
-                self.allyPieces.append(piece)
-                self.turtle.goto(-500, 0)
+                piece = Knight("pknight", "knight", self.team, self.getX(), self.getY())
             elif (a.lower() == "rook"):
-                piece = Rook(piece, "rook", self.team, self.getX(), self.getY())
-                self.allyPieces.append(piece)
-                self.turtle.goto(-500, 0)
+                piece = Rook("prook", "rook", self.team, self.getX(), self.getY())
             elif (a.lower() == "queen"):
-                piece = Queen(piece, "queen", self.team, self.getX()+150, self.getY+(100*self.pawnDirection))
-                self.allyPieces.append(piece)
-                self.turtle.goto(-500, 0)
+                piece = Queen("pqueen", "queen", self.team, self.getX(), self.getY())
             else:
                 print("misspelled")
+                
+            self.turtle.goto(-500, 0)
+            self.allyPieces.append(piece)
+            piece.turtle.clearstamps()
             
     def move(self, x, y):
         if self.firstMove:
             self.enPassantAble = True
-        else:
-            self.enPassantAble = False
+        # else:
+        #     self.enPassantAble = False
+        
         super().move(x, y)
+        
         self.pawnPromotion()
     
 class Bishop(Piece):
@@ -264,28 +264,13 @@ class King(Piece):
     def __init__(self, turtle, piece, team, posX, posY):
         super().__init__(turtle, piece, team, posX, posY)
     
-    def inCheck(self):
-        #print(self.enemyPieces)
-        for piece in self.enemyPieces:
-            print(1)
-            if (piece.piece != "king"):
-                piece.showLegalMoves()
-            for i in range(len(piece.possibleMovesX)):
-                if(self.getX == piece.possibleMovesX[i] and self.getY == piece.possibleMovesY[i]):
-                    print("IN CHECK")
-                    piece.pieceReset()
-                    return True
-            piece.pieceReset()
-        return False
-           
-    
     def castle(self):
         x = self.getX()
         y = self.getY()
         start = (x, y)
         for piece in self.allyPieces:
             if piece.name[:5] == "arook":
-                if piece.firstmove:
+                if piece.firstMove:
                     self.turtle.goto(x-100, y)
                     if self.isMoveLegal():
                         self.turtle.goto(x-200, y)
@@ -294,31 +279,43 @@ class King(Piece):
                             if self.isMoveLegal():
                                 self.turtle.goto(x-200, y)
                                 self.stampMove()
+                                self.queenSideCastle = self.getPos()
                                 
                 self.turtle.goto(start)
             if piece.name[:5] == "hrook":
-                if piece.firstmove:
+                if piece.firstMove:
                     self.turtle.goto(x+100, y)
                     if self.isMoveLegal():
                         self.turtle.goto(x+200, y)
                         if self.isMoveLegal():
                             self.stampMove()
+                            self.kingSideCastle = self.getPos()
                 self.turtle.goto(start)
 
 
             
     def showLegalMoves(self):
-        if (not self.inCheck()):
-            self.basicMove(1, 0)
-            self.basicMove(0, 1)
-            self.basicMove(1, 1)
-            self.basicMove(-1, 0)
-            self.basicMove(0, -1)
-            self.basicMove(-1, -1)
-            self.basicMove(1, -1)
-            self.basicMove(-1, 1)
-            if self.firstMove:
-                self.castle()
+        self.basicMove(1, 0)
+        self.basicMove(0, 1)
+        self.basicMove(1, 1)
+        self.basicMove(-1, 0)
+        self.basicMove(0, -1)
+        self.basicMove(-1, -1)
+        self.basicMove(1, -1)
+        self.basicMove(-1, 1)
+        if self.firstMove:
+            self.castle()
+    
+    def move(self, x, y):
+        super().move(x, y)
+        if self.getPos() == self.kingSideCastle:
+            for piece in self.allyPieces:
+                if piece.name[:5] == "hrook":
+                    piece.turtle.goto(self.getX()-100, self.getY())
+        if self.getPos() == self.queenSideCastle:
+            for piece in self.allyPieces:
+                if piece.name[:5] == "arook":
+                    piece.turtle.goto(self.getX()+100, self.getY())
 
 xcor = -350
 ycor = 350
@@ -444,7 +441,8 @@ def clickCheck(x, y):
                         if piece.isClicked(x, y):
                             piece.showLegalMoves()
             else:
-                print("GAME OVER. \n", toMove, " loses.")
+                t.Screen().bye()
+                print("\n GAME OVER. \n", toMove, " loses.")
 
 wn.onclick(clickCheck)
 wn.mainloop()
